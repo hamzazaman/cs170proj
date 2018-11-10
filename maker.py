@@ -112,6 +112,10 @@ def unnest_lsts(busses):
     return lst
 
 def rowdy_crowd(busses, max_constrain=100):
+    """
+    return:
+        2D list where each list is a rowdy group
+    """
     people = unnest_lsts(busses)
     #implement rowdy crowds filling
     # create random partitions s.t. 
