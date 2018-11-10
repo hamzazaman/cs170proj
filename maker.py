@@ -167,7 +167,7 @@ def main(program, bus_num, cap, save=False, display=False, name="test"):
             for _ in range(num_connects):
                 g2 = components[numpy.random.randint(0, size)]
                 if (comp, g2) not in seen or seen[(comp, g2)] < 3:
-                    #add_edges(comp, g2, big_graph, int(cap))
+                    add_edges(comp, g2, big_graph, int(cap))
                     if (comp, g2) in seen:
                         seen[(comp, g2)] += 1
                         seen[(g2, comp)] += 1
