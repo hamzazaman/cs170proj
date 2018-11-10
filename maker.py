@@ -163,6 +163,10 @@ def main(program, bus_num, cap, save=False, display=False, name="test"):
                     else:
                         seen[(comp, g2)] = 0
                         seen[(g2, comp)] = 0
+        
+        print(f"Busses: {busses}")
+        print(f"Number of vertices: {nx.number_of_nodes(big_graph)}")
+
         if save == "True":
             output_graph(big_graph, name)
             output_file(busses, name)
@@ -171,8 +175,6 @@ def main(program, bus_num, cap, save=False, display=False, name="test"):
         if display == "True":
             nx.draw(big_graph, with_labels=True)
             plt.show()
-        
-        print(f"Number of vertices: {nx.number_of_nodes(big_graph)}")
         
     except nx.NetworkXException:
         print("node names identical encountered", "trying again...")
