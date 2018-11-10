@@ -8,7 +8,7 @@ def generate_output_lsts(bus_num, cap):
     """
     max_possible = bus_num * cap
     num_letters = math.ceil(math.log(max_possible, 26)) + 2
-    return [[string_maker(num_letters) for _ in range(random.randint(cap/2, cap))] \
+    return [[string_maker(num_letters) for _ in range(random.randint(cap // 2, cap))] \
         for _ in range(bus_num)]
 
 def string_maker(length):
@@ -33,19 +33,19 @@ def basic_connect(graph, labels, control=123):
     val = random.uniform(0, 1)
     if val > 8 / 10:
         g = nx.complete_graph(len(labels), graph)
-        #print("generated complete graph")
+        print("generated complete graph")
     elif len(labels) > 1:
         while True:
             try:
-                #print("generating random tree")
+                print("generating random tree")
                 g = nx.random_powerlaw_tree(len(labels))
-                #print("generated random tree")
+                print("generated random tree")
                 break
             except nx.NetworkXException:
                 print("did not find tree")
                 continue
         randomly_add(g)
-        #print("added random edges to tree")
+        print("added random edges to tree")
     nx.relabel_nodes(g, {i:labels[i] for i in range(len(labels))}, False)
     return g
 
@@ -87,7 +87,8 @@ def add_edges(graph1, graph2, big_graph, cap):
     while count < 10 * len(target_nodes):
         print("looking for target edges")          
         node2 = target_nodes[numpy.random.randint(0, len(g2))]
-        if graph2.degree(node2) > 1:
+        if graph2.degree(node2) > 1 \
+                and graph2.degree(node2) + nx.number_of_nodes(graph1) > cap:
             big_graph.add_edge(most_connected, node2)
             print("found")
             return
@@ -116,27 +117,29 @@ def rowdy_crowd(busses, cap, max_constrain=100):
     return:
         2D list where each list is a rowdy group
     """
-    people = []
-    for b in busses[0:len(busses)//2]:
-        if random.randint(0,1) == 1:
-            r = b[0: random.randint(len(b)//4, len(b))]
-            randBus = busses[len(busses)//2: len(busses)][random.randint(0, len(busses)//2 - 1)]
-            r = r + randBus[0: random.randint(1, min(len(randBus) ,  int(cap) - len(r)))]
-            people.append(r)
+    while True:
+        people = []
+        for b in busses[0:len(busses)//2]:
+            if random.randint(0,1) == 1:
+                r = b[0: random.randint(len(b)//4, len(b))]
+                randBus = busses[len(busses)//2: len(busses)][random.randint(0, len(busses)//2 - 1)]
+                r = r + randBus[0: random.randint(1, max(2, min(len(randBus),  int(cap) - len(r))))]
+                people.append(r)
 
-    for b in busses[len(busses)//2: len(busses)]:
-        if random.randint(0,1) == 1:
-            r = b[0: random.randint(len(b)//4, len(b))]
-            randBus = busses[0: len(busses)//2][random.randint(0, len(busses)//2 - 1)]
-            r = r + randBus[0: random.randint(1, min(len(randBus) ,  int(cap) - len(r)))]
-            people.append(r)
-    return people
+        for b in busses[len(busses)//2: len(busses)]:
+            if random.randint(0,1) == 1:
+                r = b[0: random.randint(len(b)//4, len(b))]
+                randBus = busses[0: len(busses)//2][random.randint(0, len(busses)//2 - 1)]
+                r = r + randBus[0: random.randint(1, max(2, min(len(randBus),  int(cap) - len(r))))]
+                people.append(r)
+        if (len(people) < int(max_constrain)):
+            return people
 
-def input_file(busses, bus_num, cap, name):
+def input_file(busses, bus_num, cap, name, constrain):
     file = open(name + ".txt", "w")
     file.write(f"{bus_num}\n")
     file.write(f"{cap}\n")
-    for bus in rowdy_crowd(busses, cap):
+    for bus in rowdy_crowd(busses, cap, constrain):
         file.write("{}\n".format(bus))
 
 def output_graph(graph, name):
@@ -144,12 +147,13 @@ def output_graph(graph, name):
 
 def print_usage():
     print("USAGE")
-    print("python maker.py <save> <display> <name>")
+    print("python maker.py <save> <display> <name> <constrain>")
     print("     <save>: True", "to save file, otherwise not kept")
     print("     <display>: True", "to visualize graph, otherwise no draw")
     print("     <name>: test", "file name output")
+    print("     <constrain>: int", "rowdy kids max")
 
-def main(program, bus_num, cap, save=False, display=False, name="test"):
+def main(program, bus_num, cap, save=False, display=False, name="test", max_constrain="100"):
     big_graph = nx.Graph()
     try:
         busses = generate_output_lsts(int(bus_num), int(cap))
@@ -181,7 +185,7 @@ def main(program, bus_num, cap, save=False, display=False, name="test"):
         if save == "True":
             output_graph(big_graph, name)
             output_file(busses, name)
-            input_file(busses, bus_num, cap, name)
+            input_file(busses, int(bus_num), int(cap), name, max_constrain)
 
         if display == "True":
             nx.draw(big_graph, with_labels=True)
