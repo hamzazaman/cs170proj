@@ -121,14 +121,14 @@ def rowdy_crowd(busses, cap, max_constrain=100):
         people = []
         for b in busses[0:len(busses)//2]:
             if random.randint(0,1) == 1:
-                r = b[0: random.randint(len(b)//4, len(b))]
+                r = b[0: max(1, random.randint(len(b)//4, len(b)))]
                 randBus = busses[len(busses)//2: len(busses)][random.randint(0, len(busses)//2 - 1)]
                 r = r + randBus[0: random.randint(1, max(2, min(len(randBus),  int(cap) - len(r))))]
                 people.append(r)
 
         for b in busses[len(busses)//2: len(busses)]:
             if random.randint(0,1) == 1:
-                r = b[0: random.randint(len(b)//4, len(b))]
+                r = b[0: max(1, random.randint(len(b)//4, len(b)))]
                 randBus = busses[0: len(busses)//2][random.randint(0, len(busses)//2 - 1)]
                 r = r + randBus[0: random.randint(1, max(2, min(len(randBus),  int(cap) - len(r))))]
                 people.append(r)
@@ -136,14 +136,14 @@ def rowdy_crowd(busses, cap, max_constrain=100):
             return people
 
 def input_file(busses, bus_num, cap, name, constrain):
-    file = open(name + ".txt", "w")
+    file = open(name + "/parameters.txt", "w+")
     file.write(f"{bus_num}\n")
     file.write(f"{cap}\n")
     for bus in rowdy_crowd(busses, cap, constrain):
         file.write("{}\n".format(bus))
 
 def output_graph(graph, name):
-    nx.write_gml(graph, name + ".gml")
+    nx.write_gml(graph, name + "/graph.gml")
 
 def print_usage():
     print("USAGE")
@@ -183,6 +183,10 @@ def main(program, bus_num, cap, save=False, display=False, name="test", max_cons
         print(f"Number of vertices: {nx.number_of_nodes(big_graph)}")
 
         if save == "True":
+            try:
+                os.mkdir(name)
+            except:
+                print("folder creation failed, may exist")
             output_graph(big_graph, name)
             output_file(busses, name)
             input_file(busses, int(bus_num), int(cap), name, max_constrain)
